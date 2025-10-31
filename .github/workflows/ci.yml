@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install backend dependencies
+        run: pip install -r backend/requirements.txt flake8
+
+      - name: Lint backend
+        run: flake8 backend
+
+      - name: Django checks
+        env:
+          DJANGO_SECRET_KEY: ci-secret
+          DJANGO_DEBUG: "False"
+          ALLOWED_HOSTS: "localhost"
+          POSTGRES_DB: "crm"
+          POSTGRES_USER: "postgres"
+          POSTGRES_PASSWORD: "postgres"
+          POSTGRES_HOST: "localhost"
+          POSTGRES_PORT: "5432"
+          REDIS_URL: "redis://localhost:6379/0"
+        run: python backend/manage.py check --fail-level=ERROR
+
+  ai:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install AI orchestrator dependencies
+        working-directory: ai_orchestrator
+        run: pip install -r requirements.txt flake8
+
+      - name: Lint AI orchestrator
+        run: flake8 ai_orchestrator/app
+
+      - name: Import FastAPI app
+        working-directory: ai_orchestrator
+        run: |
+          python - <<'PY'
+          import sys
+          sys.path.append('.')
+          from app.main import app
+          print("App OK:", app.title)
+          PY
