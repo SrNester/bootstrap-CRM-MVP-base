@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual Envs
+.venv/
+venv/
+
+# Django / Logs
+*.log
+
+# Databases (local dev)
+*.sqlite3
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+
+# Env files
+.env
+.env.local
+.env.*.local
+
+# Celery schedule (runtime)
+backend/celerybeat-schedule
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
